@@ -176,9 +176,11 @@
                 <div class="tabs" id="terminal-tabs" onmousedown="app.initDrag(event)" ontouchstart="app.initDrag(event)">
                     <div>
                         <a class="tab active" data-target="xterm"><i class="fa-solid fa-terminal"></i> <span id="tab-term">Terminal</span></a>
+                        <a class="tab"        data-target="plotter"><i class="fa-solid fa-chart-line"></i> <span id="tab-plotter">Plotter</span></a>
                         <!--a class="tab"        data-target="logs"><i class="fa-solid fa-bug"></i> IDE Logs</a-->
                     </div>
                     <div>
+                        <button title="Pause plotter" onclick="app.plotterTogglePause()" id="plotter-pause" style="display:none"><i class="fa-solid fa-pause"></i></button>
                         <button title="Clear" onclick="app.clearTerminal()" id="term-clear"><i class="fa-solid fa-trash-can"></i></button>
                         <button title="Soft Reset" onclick="app.reboot('soft')"><i class="fa-solid fa-arrows-rotate"></i></button>
                         <button title="Hard Reset" onclick="app.reboot('hard')"><i class="fa-solid fa-power-off"></i></button>
@@ -187,6 +189,9 @@
                 </div>
                 <div id="xterm" class="tab-content active">
                     <!-- Xterm.js terminal content goes here -->
+                </div>
+                <div id="plotter" class="tab-content">
+                    <canvas id="plotter-canvas"></canvas>
                 </div>
                 <div id="logs" class="tab-content">
                     <!-- Logs content goes here -->

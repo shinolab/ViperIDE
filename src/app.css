@@ -141,6 +141,22 @@ body.loaded {
     background: var(--bg-color-edit);
 }
 
+#plotter {
+    flex-direction: column;
+    background: var(--bg-color-edit);
+    padding: 0;
+    overflow: hidden;
+}
+#plotter.active {
+    display: flex;
+}
+#plotter-canvas {
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0;
+    display: block;
+}
+
 .marked-viewer {
     height: 100%;
     width: 100%;

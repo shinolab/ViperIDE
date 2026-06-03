@@ -15,7 +15,10 @@
                 "ble": "Connect Bluetooth",
                 "usb": "Connect USB/Serial"
             },
-            "terminal": "Terminal"
+            "terminal": "Terminal",
+            "plotter": "Plotter",
+            "pause": "Pause plotter",
+            "resume": "Resume plotter"
         },
         "menu": {
             "package-mgr": "Package Manager",

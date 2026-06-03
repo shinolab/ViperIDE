@@ -30,6 +30,7 @@ import { ConnectionUID } from './connection_uid.js'
 import translations from '../build/translations.json'
 import { parseStackTrace, validatePython, disassembleMPY, minifyPython, prettifyPython } from './python_utils.js'
 import { MicroPythonWASM } from './emulator.js'
+import { Plotter } from './plotter.js'
 
 import { marked } from 'marked'
 import { UAParser } from 'ua-parser-js'
@@ -43,7 +44,8 @@ import { faUsb, faBluetoothB } from '@fortawesome/free-brands-svg-icons'
 import { faLink, faBars, faDownload, faCirclePlay, faCircleStop, faFolder, faFile, faFileCircleExclamation, faCubes, faGear,
          faCube, faTools, faSliders, faCircleInfo, faStar, faExpand, faCertificate,
          faPlug, faArrowUpRightFromSquare, faTerminal, faBug, faGaugeHigh,
-         faTrashCan, faArrowsRotate, faPowerOff, faPlus, faXmark
+         faTrashCan, faArrowsRotate, faPowerOff, faPlus, faXmark,
+         faChartLine, faPause, faPlay
        } from '@fortawesome/free-solid-svg-icons'
 import { faMessage, faCircleDown } from '@fortawesome/free-regular-svg-icons'
 
@@ -51,7 +53,8 @@ library.add(faUsb, faBluetoothB)
 library.add(faLink, faBars, faDownload, faCirclePlay, faCircleStop, faFolder, faFile, faFileCircleExclamation, faCubes, faGear,
          faCube, faTools, faSliders, faCircleInfo, faStar, faExpand, faCertificate,
          faPlug, faArrowUpRightFromSquare, faTerminal, faBug, faGaugeHigh,
-         faTrashCan, faArrowsRotate, faPowerOff, faPlus, faXmark)
+         faTrashCan, faArrowsRotate, faPowerOff, faPlus, faXmark,
+         faChartLine, faPause, faPlay)
 library.add(faMessage, faCircleDown)
 dom.watch()
 
@@ -65,7 +68,7 @@ const T = i18next.t.bind(i18next)
  * Device Management
  */
 
-let editor, term, port
+let editor, term, port, plotter
 let editorFn = ''
 let isInRunMode = false
 let devInfo = null
@@ -218,6 +221,7 @@ export async function connectDevice(type) {
 
     port.onReceive((data) => {
         term.write(data)
+        if (plotter) { plotter.feed(data) }
     })
 
     port.onDisconnect(() => {
@@ -625,6 +629,18 @@ export async function saveCurrentFile() {
 
 export function clearTerminal() {
     term.clear()
+    if (plotter) { plotter.clear() }
+}
+
+export function plotterTogglePause() {
+    if (!plotter) return
+    const paused = !plotter.paused
+    plotter.setPaused(paused)
+    const btn = QID('plotter-pause')
+    btn.innerHTML = paused
+        ? '<i class="fa-solid fa-play"></i>'
+        : '<i class="fa-solid fa-pause"></i>'
+    btn.setAttribute('title', paused ? T('tool.resume', 'Resume plotter') : T('tool.pause', 'Pause plotter'))
 }
 
 export async function reboot(mode = 'hard') {
@@ -901,6 +917,7 @@ export function applyTranslation() {
         QID('btn-conn-usb').setAttribute('title', T('tool.conn.usb'))
         QID('term-clear').setAttribute('title',   T('tool.clear'))
         QID('tab-term').innerText = T('tool.terminal')
+        QID('tab-plotter').innerText = T('tool.plotter', 'Plotter')
 
         QSA('#app-expand, #term-expand').forEach(el => {
             el.setAttribute('title', T('tool.fullscreen'))
@@ -1127,6 +1144,16 @@ export function applyTranslation() {
     new ResizeObserver(() => {
         fitAddon.fit()
     }).observe(QID('xterm'))
+
+    plotter = new Plotter(QID('plotter-canvas'))
+
+    // Show the Pause button only while the Plotter tab is active
+    QSA('#terminal-tabs .tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const onPlotter = tab.getAttribute('data-target') === 'plotter'
+            QID('plotter-pause').style.display = onPlotter ? '' : 'none'
+        })
+    })
 
     window.addEventListener('keydown', (ev) => {
         // ctrlKey for Windows/Linux, metaKey for Mac
