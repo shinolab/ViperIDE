@@ -191,6 +191,21 @@
                     <!-- Xterm.js terminal content goes here -->
                 </div>
                 <div id="plotter" class="tab-content">
+                    <div id="plotter-controls">
+                        <label><span id="plotter-lbl-window">Window</span>
+                            <select id="plotter-window">
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="250">250</option>
+                                <option value="500">500</option>
+                                <option value="1000" selected>1000</option>
+                                <option value="2000">2000</option>
+                            </select>
+                        </label>
+                        <label><input type="checkbox" id="plotter-autoscale" checked/><span id="plotter-lbl-autoy">Auto Y</span></label>
+                        <label>min <input type="number" step="1000" id="plotter-ymin" value="90000"/></label>
+                        <label>max <input type="number" step="1000" id="plotter-ymax" value="1100000"/></label>
+                    </div>
                     <canvas id="plotter-canvas"></canvas>
                 </div>
                 <div id="logs" class="tab-content">

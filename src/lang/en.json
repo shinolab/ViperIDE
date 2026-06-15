@@ -20,6 +20,10 @@
             "pause": "Pause plotter",
             "resume": "Resume plotter"
         },
+        "plotter": {
+            "window": "Window",
+            "auto-y": "Auto Y"
+        },
         "menu": {
             "package-mgr": "Package Manager",
             "file-mgr": "File Manager",

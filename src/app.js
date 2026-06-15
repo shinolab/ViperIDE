@@ -918,6 +918,8 @@ export function applyTranslation() {
         QID('term-clear').setAttribute('title',   T('tool.clear'))
         QID('tab-term').innerText = T('tool.terminal')
         QID('tab-plotter').innerText = T('tool.plotter', 'Plotter')
+        QID('plotter-lbl-window').innerText = T('plotter.window', 'Window')
+        QID('plotter-lbl-autoy').innerText = T('plotter.auto-y', 'Auto Y')
 
         QSA('#app-expand, #term-expand').forEach(el => {
             el.setAttribute('title', T('tool.fullscreen'))
@@ -1154,6 +1156,39 @@ export function applyTranslation() {
             QID('plotter-pause').style.display = onPlotter ? '' : 'none'
         })
     })
+
+    // Plotter controls: time window, manual Y range, fit-to-data
+    const plWindow = QID('plotter-window')
+    const plAuto = QID('plotter-autoscale')
+    const plYMin = QID('plotter-ymin')
+    const plYMax = QID('plotter-ymax')
+
+    plWindow.addEventListener('change', () => {
+        plotter.setMaxPoints(parseInt(plWindow.value, 10))
+    })
+
+    const applyManualRange = () => {
+        plotter.setYRange(parseFloat(plYMin.value), parseFloat(plYMax.value))
+    }
+
+    plAuto.addEventListener('change', () => {
+        const auto = plAuto.checked
+        plYMin.disabled = plYMax.disabled = auto
+        if (auto) {
+            plotter.setAutoscale(true)
+        } else {
+            // Seed the inputs with the current view so there's a sensible start
+            if (plYMin.value === '' || plYMax.value === '') {
+                const r = plotter.getAutoRange()
+                plYMin.value = r.min.toPrecision(4)
+                plYMax.value = r.max.toPrecision(4)
+            }
+            applyManualRange()
+        }
+    })
+
+    plYMin.addEventListener('change', applyManualRange)
+    plYMax.addEventListener('change', applyManualRange)
 
     window.addEventListener('keydown', (ev) => {
         // ctrlKey for Windows/Linux, metaKey for Mac

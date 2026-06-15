@@ -46,12 +46,20 @@ export class Plotter {
     constructor(canvas) {
         this.canvas = canvas
         this.ctx = canvas.getContext('2d')
-        this.maxPoints = 1000          // sliding window length
+        this.maxPoints = 1000          // sliding window length (time axis)
         this.series = []               // [{ label, color, data: [numbers] }]
         this.paused = false
         this.lineBuffer = ''
         this.dirty = false
         this.dpr = window.devicePixelRatio || 1
+
+        // Y-axis scaling: auto (track visible data) or a fixed manual range.
+        // Defaults to a manual range tuned for a typical pulse-sensor ADC signal.
+        this.autoscale = true
+        this.yMin = 90000
+        this.yMax = 1100000
+        this.lastAutoMin = 0           // most recent auto-computed range
+        this.lastAutoMax = 1
 
         this._resize()
         this._frame = this._frame.bind(this)
@@ -131,6 +139,35 @@ export class Plotter {
         this.paused = paused
     }
 
+    setMaxPoints(n) {
+        this.maxPoints = Math.max(2, n | 0)
+        for (const s of this.series) {
+            if (s.data.length > this.maxPoints) {
+                s.data.splice(0, s.data.length - this.maxPoints)
+            }
+        }
+        this.dirty = true
+    }
+
+    setAutoscale(auto) {
+        this.autoscale = !!auto
+        this.dirty = true
+    }
+
+    setYRange(min, max) {
+        if (isFinite(min) && isFinite(max) && min < max) {
+            this.yMin = min
+            this.yMax = max
+            this.autoscale = false
+            this.dirty = true
+        }
+    }
+
+    /* Range that auto-scaling would currently use (for the "Fit" action). */
+    getAutoRange() {
+        return { min: this.lastAutoMin, max: this.lastAutoMax }
+    }
+
     _resize() {
         const rect = this.canvas.getBoundingClientRect()
         if (!rect.width || !rect.height) return
@@ -183,6 +220,14 @@ export class Plotter {
         if (min === max) { min -= 1; max += 1 }
         const pad = (max - min) * 0.1
         min -= pad; max += pad
+        this.lastAutoMin = min
+        this.lastAutoMax = max
+
+        // Use the fixed manual range when auto-scaling is turned off
+        if (!this.autoscale) {
+            min = this.yMin
+            max = this.yMax
+        }
         const range = max - min
 
         const xPoints = Math.max(maxLen, 2)

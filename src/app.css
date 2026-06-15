@@ -156,6 +156,31 @@ body.loaded {
     min-height: 0;
     display: block;
 }
+#plotter-controls {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    background: var(--bg-color);
+    user-select: none;
+}
+#plotter-controls label {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+#plotter-controls input[type="number"] {
+    width: 5.5em;
+}
+#plotter-controls input[type="number"]:disabled {
+    opacity: 0.4;
+}
+#plotter-controls button {
+    padding: 2px 8px;
+}
 
 .marked-viewer {
     height: 100%;
